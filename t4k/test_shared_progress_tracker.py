@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 
+import shutil
 import multiprocessing
 from multiprocessing.managers import BaseManager
 import time
 import random
 import t4k
-
-
-
-
-
-
 
 def run_test1():
 	tracker = t4k.SharedProgressTracker('test_dict')
@@ -26,7 +21,7 @@ def run_test1():
 	p1.join()
 	p2.join()
 
-	print tracker['yo']
+	print tracker['yo'], '(should be 20000.)'
 	tracker.close()
 
 
@@ -46,6 +41,10 @@ def run_test2():
 
 	print [int(tracker['A:'+str(i)] - start_time) for i in range(10)]
 	print [int(tracker['B:'+str(i)] - start_time) for i in range(10)]
+	print (
+		'(numbers in second list should all be greater than or equal'
+		' to those in first list.)'
+	)
 
 	tracker.close()
 
@@ -61,14 +60,8 @@ def test_hold(tracker, name):
 
 def test_concurrent_write(tracker, name):
 	for i in range(10000):
-
-		# show activity
-		#if i % 1000 == 0:
-		#	print name
-
-		# We're testing whether this is treated as atomic
-		# if two processes do it 10000 times, but collide, the value
-		# found at the end will be less than 20000
+		if i % 1000 == 0:
+			print '.'
 		tracker.hold()
 		if 'yo' in tracker:
 			tracker['yo'] += 1
@@ -78,9 +71,12 @@ def test_concurrent_write(tracker, name):
 
 
 if __name__=='__main__':
-	while True:
-		run_test1()
-	#run_test2()
+	# Remove pre-existing left-over test files from previous test
+	shutil.rmtree('test_dict')
+
+	# Run tests
+	run_test2()
+	run_test1()
 
 
 
