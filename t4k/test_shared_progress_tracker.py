@@ -1,16 +1,24 @@
+#!/usr/bin/env python
+
 import multiprocessing
+from multiprocessing.managers import BaseManager
 import time
 import random
 import t4k
 
 
-def run_test():
-	#tracker = t4k.ProgressTracker('test_dict')
+
+
+
+
+
+def run_test1():
 	tracker = t4k.SharedProgressTracker('test_dict')
 
-
-	p1 = multiprocessing.Process(target=rand_sleep, args=(tracker,))
-	p2 = multiprocessing.Process(target=rand_sleep, args=(tracker,))
+	p1 = multiprocessing.Process(
+			target=test_concurrent_write, args=(tracker,'A'))
+	p2 = multiprocessing.Process(
+			target=test_concurrent_write, args=(tracker,'B'))
 
 	p1.start()
 	p2.start()
@@ -22,15 +30,113 @@ def run_test():
 	tracker.close()
 
 
-def rand_sleep(tracker):
+def run_test2():
+	tracker = t4k.SharedProgressTracker('test_dict')
+
+	p1 = multiprocessing.Process(target=test_hold, args=(tracker,'A'))
+	p2 = multiprocessing.Process(target=test_hold, args=(tracker,'B'))
+
+	start_time = time.time()
+
+	p1.start()
+	p2.start()
+
+	p1.join()
+	p2.join()
+
+	print [int(tracker['A:'+str(i)] - start_time) for i in range(10)]
+	print [int(tracker['B:'+str(i)] - start_time) for i in range(10)]
+
+	tracker.close()
+
+
+def test_hold(tracker, name):
+	tracker.hold()
 	for i in range(10):
-		print '.'
+		print '+'
 		time.sleep(random.random())
+		tracker['%s:%d' % (name, i)] = time.time()
+	tracker.unhold()
+
+
+def test_concurrent_write(tracker, name):
+	for i in range(10000):
+
+		# show activity
+		#if i % 1000 == 0:
+		#	print name
+
+		# We're testing whether this is treated as atomic
+		# if two processes do it 10000 times, but collide, the value
+		# found at the end will be less than 20000
+		tracker.hold()
 		if 'yo' in tracker:
 			tracker['yo'] += 1
 		else:
 			tracker['yo'] = 1
+		tracker.unhold()
 
 
 if __name__=='__main__':
-	run_test()
+	while True:
+		run_test1()
+	#run_test2()
+
+
+
+# Tried doing this using a manager
+#
+#POD_PUBLIC_METHODS = [
+#	'hold',
+#	'unhold',
+#	'keys',
+#	'values',
+#	'read',
+#	'mark_dirty',
+#	'sync',
+#	'escape_key',
+#	'__iter__',
+#	'next',
+#	'__contains__',
+#	'__len__',
+#	'__getitem__',
+#	'ensure_unicode',
+#	'update',
+#	'__setitem__',
+#	'check_or_add',
+#	'set_item',
+#	'set',
+#	'check',
+#	'add',
+#	'increment_tries',
+#	'reset_tries',
+#	'mark_done',
+#	'mark_not_done',
+#]
+#
+#def test_manager():
+#
+#	class MyManager(BaseManager):
+#		pass
+#
+#	MyManager.register(
+#		'ProgressTracker', t4k.ProgressTracker, exposed=POD_PUBLIC_METHODS
+#	)
+#	manager = MyManager()
+#	manager.start()
+#
+#	tracker = manager.ProgressTracker('test_dict')
+#
+#	p1 = multiprocessing.Process(
+#		target=test_concurrent_write, args=(tracker,'A'))
+#	p2 = multiprocessing.Process(
+#		target=test_concurrent_write, args=(tracker,'B'))
+#
+#	p1.start()
+#	p2.start()
+#
+#	p1.join()
+#	p2.join()
+#
+#	print tracker['yo']
+

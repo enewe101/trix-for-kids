@@ -266,6 +266,22 @@ class PersistentOrderedDict(object):
 		self.sync()
 
 
+	def set_item(self, key, val):
+
+		key = self.ensure_unicode(key)
+		val = copy.deepcopy(val)
+
+		# if there isn't already an entry, we need to allocate a new slot
+		if key not in self.data:
+			self.key_order.append(key)
+			self.index_lookup[key] = len(self.key_order)-1
+
+		# update the value held at <key>
+		self.data[key] = val
+		self.mark_dirty(key)
+		self.sync()
+
+
 	def __setitem__(self, key, val):
 
 		key = self.ensure_unicode(key)
@@ -358,26 +374,30 @@ def requires_tracker_open(f):
 	return f_that_requires_tracker_open
 
 
+
 class CalledClosedTrackerException(Exception):
 	pass
+
 
 
 class SharedProgressTracker(object):
 	pass
 
 	CLOSE = 0
-	LOCK = multiprocessing.Lock()
+	LOCK = multiprocessing.RLock()
 
 	def __init__(self, path):
 
-		# create a real progress_tracker and a listen loop around it
 		self.client_pipe, server_pipe = multiprocessing.Pipe()
 		self.lock = multiprocessing.Lock()
+
+		# create a real progress_tracker and a listen loop around it
 		client_tracker = multiprocessing.Process(
 			target=progress_tracker_serve,
 			args=(path, server_pipe)
 		)
 		client_tracker.start()
+
 		self.tracker_open = True
 
 	@requires_lock(LOCK)
@@ -385,16 +405,17 @@ class SharedProgressTracker(object):
 		self.client_pipe.send(self.CLOSE)
 
 	@requires_tracker_open
-	@requires_lock(LOCK)
 	def hold(self):
+		self.LOCK.acquire()
 		self.client_pipe.send(('hold',))
 		return self.client_pipe.recv()
 
 	@requires_tracker_open
-	@requires_lock(LOCK)
 	def unhold(self):
 		self.client_pipe.send(('unhold',))
-		return self.client_pipe.recv()
+		return_val = self.client_pipe.recv()
+		self.LOCK.release()
+		return return_val
 
 	@requires_tracker_open
 	@requires_lock(LOCK)
@@ -492,9 +513,6 @@ class SharedProgressTracker(object):
 		self.client_pipe.send(('mark_not_done', key))
 		return self.client_pipe.recv()
 
-
-
-		
 
 	
 def progress_tracker_serve(path, pipe):
