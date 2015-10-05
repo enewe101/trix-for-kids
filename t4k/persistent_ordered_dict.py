@@ -72,6 +72,7 @@ class PersistentOrderedDict(object):
 		self.dirty_files = set()
 
 
+
 	def hold(self):
 		'''
 		temporarily prevent writing updates to file
@@ -92,7 +93,7 @@ class PersistentOrderedDict(object):
 
 
 	def values(self):
-		return copy.deep_copy([self.data[k] for k in self.key_order])
+		return copy.deepcopy([self.data[k] for k in self.key_order])
 
 
 	def read(self):
@@ -277,6 +278,36 @@ class PersistentOrderedDict(object):
 		self.sync()
 
 
+	def set(self, key, subkey, value):
+		self[key][subkey] = value
+		self.update(key)
+
+
+	def add(self, key):
+		if key in self:
+			raise DuplicateKeyException(
+				'PersistentOrderedDict: key "%s" already exists.' % key)
+		else:
+			self[key] = True
+
+	def convert_to_tracker(self):
+
+		# Rewrite every value to satisfy the form of a progress tracker
+		self.hold()
+		for key, spec in self:
+
+			# Ensure the value at key is a dict, and add special keys
+			if not isinstance(spec, dict):
+				self[key] = {'val':spec, '_done':False, '_tries':0}
+			else:
+				self[key].update({'_done':False, '_tries':0})
+
+			# Mark the key as updated
+			self.update(key)
+
+		self.unhold()
+
+
 class ProgressTracker(PersistentOrderedDict):
 
 	def check_or_add(self, key):
@@ -293,11 +324,6 @@ class ProgressTracker(PersistentOrderedDict):
 		else:
 			self[key] = {'_done':False, '_tries':0}
 			return False
-
-
-	def set(self, key, subkey, value):
-		self[key][subkey] = value
-		self.update(key)
 
 
 	def check(self, key):
