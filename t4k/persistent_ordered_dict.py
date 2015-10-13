@@ -5,6 +5,9 @@ like a python dict, and which is easy to keep synced with an on-disk copy
 This allows you to easily persist data between non-concurrent runs of a
 program.  It's useful for keeping track of progress in long jobs.
 '''
+
+
+import atexit
 import signal
 import time
 import sys
@@ -15,24 +18,6 @@ import os
 import re
 import copy
 from file_utils import lsfiles
-
-
-
-class GracefulDeath(object):
-	'''
-	Catches kill singals and acknowledges kill signals so that other
-	clients can finish critical steps before dying
-
-	The client callable should instantiate a GracefulDeath, and then
-	watch it's kill_now flag to know when it should die
-	'''
-	kill_now = False
-	def __init__(self):
-		signal.signal(signal.SIGINT, self.exit_gracefully)
-		signal.signal(signal.SIGTERM, self.exit_gracefully)
-
-	def exit_gracefully(self,signum, frame):
-		self.kill_now = True
 
 
 class DuplicateKeyException(Exception):
@@ -71,6 +56,8 @@ class PersistentOrderedDict(object):
 		# Keep track of files whose contents don't match values in memory
 		self.dirty_files = set()
 
+		# Always be sure to synchronize before the script exits
+		atexit.register(self.unhold)
 
 
 	def hold(self):
@@ -149,8 +136,7 @@ class PersistentOrderedDict(object):
 
 	def sync(self):
 
-		graceful = GracefulDeath()
-
+		#graceful = GracefulDeath()
 
 		# No synchronization happens when hold is on.  This reduces I/O
 		# when many values need to be updated
@@ -175,10 +161,9 @@ class PersistentOrderedDict(object):
 
 		# No more dirty files
 		self.dirty_files = set()
-		if graceful.kill_now:
-			print 'dying gracefully'
-			sys.exit(0)
-			
+		#if graceful.kill_now:
+		#	print 'dying gracefully'
+		#	sys.exit(0)
 
 
 	def escape_key(self, key):
@@ -237,10 +222,11 @@ class PersistentOrderedDict(object):
 
 	def update(self, key):
 		'''
-		This can be called to ensure that a specific key will be synchronized.
-		It's helpful if a mutable object is stored at that key, since it
-		could be changed without triggering __setitem__; this provides a way
-		to notify PersistentOrderedDict that the value at that key has changed.
+		This can be called to ensure that a specific key will be 
+		synchronized.  It's helpful if a mutable object is stored at that 
+		key, since it could be changed without triggering __setitem__;
+		this provides a way to notify PersistentOrderedDict that the value 
+		at that key has changed.
 		'''
 		self.mark_dirty(key)
 		self.sync()
@@ -335,6 +321,7 @@ class ProgressTracker(PersistentOrderedDict):
 		else:
 			return False
 
+
 	def add(self, key):
 		if key in self:
 			raise DuplicateKeyException(
@@ -342,21 +329,27 @@ class ProgressTracker(PersistentOrderedDict):
 		else:
 			self[key] = {'_done':False, '_tries':0}
 
+
 	def increment_tries(self, key):
 		self[key]['_tries'] += 1
 		self.update(key)
+
 
 	def reset_tries(self, key):
 		self[key]['_tries'] = 0
 		self.update(key)
 
+
 	def mark_done(self, key):
 		self[key]['_done'] = True
 		self.update(key)
 
+
 	def mark_not_done(self, key):
 		self[key]['_done'] = False
 		self.update(key)
+
+
 
 def requires_lock(lock):
 	def decorator(f):
@@ -533,3 +526,22 @@ def progress_tracker_serve(path, pipe):
 
 		
 
+# This was used to ensure that the PersistentOrderedDict got the chance
+# to synchronize with the filesystem before the script exited (and likewise
+# for the ProgressTracker.  Now the atexit module is being used.
+#
+#class GracefulDeath(object):
+#	'''
+#	Catches kill singals and acknowledges kill signals so that other
+#	clients can finish critical steps before dying
+#
+#	The client callable should instantiate a GracefulDeath, and then
+#	watch it's kill_now flag to know when it should die
+#	'''
+#	kill_now = False
+#	def __init__(self):
+#		signal.signal(signal.SIGINT, self.exit_gracefully)
+#		signal.signal(signal.SIGTERM, self.exit_gracefully)
+#
+#	def exit_gracefully(self,signum, frame):
+#		self.kill_now = True
