@@ -29,7 +29,7 @@ class ls(object):
 		path,
 		files=True,
 		dirs=False,
-		whitelist='^.*$',
+		whitelist='.*',
 		blacklist='^$',
 		absolute=False,
 		recurse=False,
@@ -136,7 +136,9 @@ class ls(object):
 		for item in items:
 
 			# Skip if it doesn't match whitelist, or does match blacklist
-			if not self.whitelist.match(item) or self.blacklist.match(item):
+			if not (
+				self.whitelist.search(item) or self.blacklist.search(item)
+			):
 				continue
 
 			# Append files to the list of files
