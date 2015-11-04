@@ -60,7 +60,6 @@ class ls(object):
 	def __iter__(self):
 		self.yield_files, self.yield_dirs = self._ls(self.path)
 		self.visit_dirs = list(self.yield_dirs)
-		self.context = ''
 		return self
 
 
@@ -95,12 +94,11 @@ class ls(object):
 			# Try looking in the next dir
 			if self.recurse:
 				try:
-					self.context = self.visit_dirs.pop()
+					next_dir = self.visit_dirs.pop()
 				except IndexError:
 					raise StopIteration
 				else:
-					self.yield_files, self.yield_dirs = self._ls(
-						self.context)
+					self.yield_files, self.yield_dirs = self._ls(next_dir)
 					self.visit_dirs.extend(self.yield_dirs)
 
 			# If not recursive, then we're done
@@ -143,7 +141,7 @@ class ls(object):
 				continue
 
 			# Append files to the list of files
-			if os.path.isfile(os.path.join(path, item)):
+			if os.path.isfile(item):
 				files.append(item)
 
 			# Append directories to the list of dirs
