@@ -17,7 +17,7 @@ import json
 import os
 import re
 import copy
-from file_utils import lsfiles
+from file_utils import ls
 
 
 class DuplicateKeyException(Exception):
@@ -90,7 +90,7 @@ class PersistentOrderedDict(object):
 		self.data = {}
 
 		i=0
-		for fname in lsfiles(self.path):
+		for fname in ls(self.path):
 
 			# ensure that files are in expected order,
 			# that none are missing, and that no lines are missing.
