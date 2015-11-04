@@ -94,7 +94,7 @@ class PersistentOrderedDict(object):
 
 			# ensure that files are in expected order,
 			# that none are missing, and that no lines are missing.
-			assert(fname == '%d.json' % i)
+			assert(fname == os.path.join(self.path, '%d.json' % i))
 			if i > 0:
 				prev_file_path = os.path.join(self.path, '%d.json' % (i-1))
 				num_lines_prev_file = len(
@@ -109,7 +109,7 @@ class PersistentOrderedDict(object):
 
 			i += 1
 
-			for entry in open(os.path.join(self.path, fname)):
+			for entry in open(os.path.join(fname)):
 
 				# skip blank lines (there's always one at end of file)
 				if entry=='':
