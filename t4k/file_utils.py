@@ -58,8 +58,7 @@ class ls(object):
 
 
 	def __iter__(self):
-		self.yield_files, self.yield_dirs = self._ls(
-			self.path, base_name_only=False)
+		self.yield_files, self.yield_dirs = self._ls(self.path)
 		self.visit_dirs = list(self.yield_dirs)
 		self.context = ''
 		return self
@@ -101,7 +100,7 @@ class ls(object):
 					raise StopIteration
 				else:
 					self.yield_files, self.yield_dirs = self._ls(
-						self.context, base_name_only=False)
+						self.context)
 					self.visit_dirs.extend(self.yield_dirs)
 
 			# If not recursive, then we're done
@@ -109,7 +108,7 @@ class ls(object):
 				raise StopIteration
 
 
-	def _ls(self, path, base_name_only=True, filter_back_pointers=True):
+	def _ls(self, path, filter_back_pointers=True):
 
 		# Ask OS to list the files and directories in path
 		if self.list_all:
@@ -125,7 +124,7 @@ class ls(object):
 			sort_command = ['sort', '-r']
 		items = subprocess.check_output(sort_command, stdin=ls.stdout)
 		ls.wait()
-		items = items.split()
+		items = [os.path.join(path, i) for i in items.split()]
 
 		# Get rid of '.' and '..', if necessary
 		if self.list_all and filter_back_pointers:
@@ -145,17 +144,11 @@ class ls(object):
 
 			# Append files to the list of files
 			if os.path.isfile(os.path.join(path, item)):
-				if not base_name_only:
-					files.append(os.path.join(path, item))
-				else:
-					files.append(item)
+				files.append(item)
 
 			# Append directories to the list of dirs
 			else:
-				if not base_name_only:
-					dirs.append(os.path.join(path, item))
-				else:
-					dirs.append(item)
+				dirs.append(item)
 
 		return files, dirs
 
