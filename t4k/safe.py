@@ -14,10 +14,14 @@ def _filter_min_max_args(*args):
 		else:
 			filtered_args = args
 
-	# if argument was iterable, but is empty after filtering, return None
 	else:
+		# if argument was iterable, but empty after filtering, return None
 		if len(filtered_args) == 0:
 			return None
+
+		# if argument was iterable, but is singleton now, wrap as list
+		elif len(filtered_args) == 1:
+			return [filtered_args]
 
 	return filtered_args
 
