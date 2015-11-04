@@ -58,7 +58,8 @@ class ls(object):
 
 
 	def __iter__(self):
-		self.yield_files, self.yield_dirs = self._ls(self.path)
+		self.yield_files, self.yield_dirs = self._ls(
+			self.path, base_name_only=False)
 		self.visit_dirs = list(self.yield_dirs)
 		self.context = ''
 		return self
