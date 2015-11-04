@@ -136,8 +136,9 @@ class ls(object):
 		for item in items:
 
 			# Skip if it doesn't match whitelist, or does match blacklist
-			if not (
-				self.whitelist.search(item) or self.blacklist.search(item)
+			if (
+				not self.whitelist.search(item) 
+				or self.blacklist.search(item)
 			):
 				continue
 
