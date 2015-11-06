@@ -115,6 +115,7 @@ class ls(object):
 			list_command = ['ls', path]
 		ls = subprocess.Popen(list_command, stdout=subprocess.PIPE)
 
+
 		# Sort the files and directories
 		if self.natural_sort:
 			sort_command = ['sort', '-n', '-r']
