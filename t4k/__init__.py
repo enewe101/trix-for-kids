@@ -15,3 +15,4 @@ from string_alignment import (
 	string_align_masks, string_align_path
 )
 from grouper import chunk, group
+import patterns

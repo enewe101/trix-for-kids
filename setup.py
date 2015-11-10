@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
 	name='t4k',
-	version='0.2',
+	version='0.3',
 	description='my personal swiss army knife',
 	author='edward newell',
 	author_email='edward.newell@gmail.com',
