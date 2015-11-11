@@ -5,6 +5,7 @@ from multiprocessing import Process, Pipe
 
 DONE = True
 NOT_DONE = False
+SUICIDE = -1
 
 class ManagedProcess(object):
 	'''
@@ -70,8 +71,14 @@ class ManagedProcess(object):
 			# Listen for a call from the subprocess
 			responding = self.connection.poll(self.call_delay)
 
-			# If no call was received after call_delay, restart the process
-			if not responding:
+			# Update status if we get a response
+			if responding:
+				response = self.connection.recv()
+				if response = DONE:
+					status = DONE
+
+			# If no response, or suicide, restart the process
+			if not responding or response == SUICIDE:
 				print 'Manager: the process is not responding.'
 
 				# If the process is alive, assume it is hung, kill it.
@@ -84,10 +91,6 @@ class ManagedProcess(object):
 				# Restart the process
 				print 'Manager: respawning process...'
 				self._start_managed_process()
-
-			# Update the status based on the subprocess' call
-			else:
-				status = self.connection.recv()
 
 		print 'Manager: process finished!'
 
