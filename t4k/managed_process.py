@@ -43,6 +43,10 @@ class ManagedProcess(object):
 
 
 	def start(self):
+		manager_process = Process(target=self._start)
+		manager_process.start()
+
+	def _start(self):
 		'''
 		call <func> inside a subprocess, passing it <args> and <kwargs>.  
 		Expect that subprocess to communicate via a pipe every 
