@@ -16,3 +16,4 @@ from string_alignment import (
 )
 from grouper import chunk, group
 import patterns
+from logging import trace
