@@ -74,7 +74,7 @@ class ManagedProcess(object):
 			# Update status if we get a response
 			if responding:
 				response = self.connection.recv()
-				if response = DONE:
+				if response == DONE:
 					status = DONE
 
 			# If no response, or suicide, restart the process
