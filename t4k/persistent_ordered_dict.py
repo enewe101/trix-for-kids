@@ -134,6 +134,7 @@ class PersistentOrderedDict(object):
 
 	def mark_dirty(self, key):
 
+		key = self.ensure_unicode(key)
 		index = self.index_lookup[key]
 		file_num = index / self.LINES_PER_FILE
 		self.dirty_files.add(file_num)
@@ -233,6 +234,7 @@ class PersistentOrderedDict(object):
 		this provides a way to notify PersistentOrderedDict that the value 
 		at that key has changed.
 		'''
+		key = self.ensure_unicode(key)
 		self.mark_dirty(key)
 		self.sync()
 
@@ -270,11 +272,13 @@ class PersistentOrderedDict(object):
 
 
 	def set(self, key, subkey, value):
+		key = self.ensure_unicode(key)
 		self[key][subkey] = value
 		self.update(key)
 
 
 	def add(self, key):
+		key = self.ensure_unicode(key)
 		if key in self:
 			raise DuplicateKeyException(
 				'PersistentOrderedDict: key "%s" already exists.' % key)
@@ -307,6 +311,7 @@ class ProgressTracker(PersistentOrderedDict):
 		(returns True if so).  If no entry exists for key, it makes one
 		and provides it with a defualt value of _done:False and _tries:0
 		'''
+		key = self.ensure_unicode(key)
 		if key in self:
 			if self[key]['_done']:
 				return True
@@ -318,6 +323,7 @@ class ProgressTracker(PersistentOrderedDict):
 
 
 	def check(self, key):
+		key = self.ensure_unicode(key)
 		if key in self:
 			if self[key]['_done']:
 				return True
@@ -328,6 +334,7 @@ class ProgressTracker(PersistentOrderedDict):
 
 
 	def add(self, key):
+		key = self.ensure_unicode(key)
 		if key in self:
 			raise DuplicateKeyException(
 				'ProgressTracker: key "%s" already exists.' % key)
@@ -336,21 +343,25 @@ class ProgressTracker(PersistentOrderedDict):
 
 
 	def increment_tries(self, key):
+		key = self.ensure_unicode(key)
 		self[key]['_tries'] += 1
 		self.update(key)
 
 
 	def reset_tries(self, key):
+		key = self.ensure_unicode(key)
 		self[key]['_tries'] = 0
 		self.update(key)
 
 
 	def mark_done(self, key):
+		key = self.ensure_unicode(key)
 		self[key]['_done'] = True
 		self.update(key)
 
 
 	def mark_not_done(self, key):
+		key = self.ensure_unicode(key)
 		self[key]['_done'] = False
 		self.update(key)
 
