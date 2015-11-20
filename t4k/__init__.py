@@ -14,6 +14,6 @@ from string_alignment import (
 	StringAligner, string_distance, string_align, 
 	string_align_masks, string_align_path
 )
-from grouper import chunk, group
+from grouper import chunk, group, flatten
 import patterns
 from logging import trace

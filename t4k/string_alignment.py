@@ -85,6 +85,7 @@ class StringAligner(object):
 		return distance, path
 
 
+
 	def string_distance(self, name1, name2):
 		distance, path = self.string_alignment(name1, name2)
 		return distance[-1][-1]

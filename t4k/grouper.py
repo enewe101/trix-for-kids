@@ -1,5 +1,43 @@
 import math
 
+def flatten(iterable, recurse=False, depth=0):
+	'''
+	flattens an iterable of iterables into a simple list.  E.g.
+	turns a list of list of elements into a simple list of elements.
+
+	<recurse> will attempt to flatten the elements within the inner 
+	iterable too, and will continue so long as the elements found are 
+	iterable.  However, recurse will treat strings as atomic, even though
+	they are iterable.
+	'''
+
+	flat_list = []
+	for element in iterable:
+
+		# If the element is not iterable, just add it to the flat list
+		try:
+			iter(element)
+		except:
+			flat_list.append(element)
+			continue
+		else:
+
+			# If the element is a string, treat it as not iterable
+			if isinstance(element, basestring):
+				flat_list.append(element)
+
+			# If the element is iterable and <recurse> is True, recurse
+			elif recurse:
+				flat_list.extend(flatten(element, recurse))
+
+			# If the element is iterable but <recurse> is False, extend
+			else:
+				flat_list.extend(element)
+
+	return flat_list
+
+
+
 def group(iterable, num_chunks):
 	'''
 	Breaks <iterable> into <num_chunks> chunks (lists) of approximately 
