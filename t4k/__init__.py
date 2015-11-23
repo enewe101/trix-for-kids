@@ -17,3 +17,4 @@ from string_alignment import (
 from grouper import chunk, group, flatten
 import patterns
 from logging import trace
+from vectorize import Vectorizer
