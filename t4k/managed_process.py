@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import psutil
+import time
 from multiprocessing import Process, Pipe
 
 DONE = True
@@ -19,13 +20,13 @@ class ManagedProcess(object):
 	to the manager and signal that it is done.
 	'''
 
-	def __init__(self, target, args=(), kwargs={}, call_delay=60):
+	def __init__(self, target, args=(), kwargs={}, timeout=60):
 
 		# Register args
 		self.target = target
 		self.args = args
 		self.kwargs = kwargs
-		self.call_delay = call_delay
+		self.timeout = timeout
 
 
 	def _start_managed_process(self):
@@ -51,8 +52,8 @@ class ManagedProcess(object):
 		'''
 		call <func> inside a subprocess, passing it <args> and <kwargs>.  
 		Expect that subprocess to communicate via a pipe every 
-		<call_delay> seconds.  If no call back is received after 
-		<call_delay> seconds, kill the subprocess, and restart it
+		<timeout> seconds.  If no call back is received after 
+		<timeout> seconds, kill the subprocess, and restart it
 		by calling func again with the original arguments.
 
 		The target function must have an argument called pipe, which
@@ -69,7 +70,7 @@ class ManagedProcess(object):
 		while status == NOT_DONE:
 
 			# Listen for a call from the subprocess
-			responding = self.connection.poll(self.call_delay)
+			responding = self.connection.poll(self.timeout)
 
 			# Update status if we get a response
 			if responding:
@@ -79,14 +80,18 @@ class ManagedProcess(object):
 
 			# If no response, or suicide, restart the process
 			if not responding or response == SUICIDE:
-				print 'Manager: the process is not responding.'
 
-				# If the process is alive, assume it is hung, kill it.
-				if self.managed_process.is_alive():
-					print (
-						'Manager: but it is still alive.  Killing it...'
-					)
+				# Give suicidal processes time to die
+				if response == SUICIDE:
+					time.sleep(3)
+
+				# Try to forcibly kill the process
+				try:
 					kill_proc_tree(self.managed_process.pid)
+
+				# If the process was already dead, that's OK
+				except psutil.NoSuchProcess:
+					pass
 
 				# Restart the process
 				print 'Manager: respawning process...'

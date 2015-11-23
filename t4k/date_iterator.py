@@ -100,3 +100,50 @@ class DateIterator(object):
 		# Return the subinterval
 		return interval_start, interval_end
 
+
+class DateBinner(object):
+
+	DATE_FORMAT = '%Y/%m/%d'
+
+	def __init__(self, start, end, increment_by_days=7):
+		self.start = start
+		self.end = end
+		self.increment_by_days = increment_by_days
+
+		self.date_keys = self.get_date_keys(start, end, increment_by_days)
+
+
+	def get_date_keys(self, start, end, increment_by_days):
+
+		# We'll accumulate a list of tuples consisting of <k, start, end>
+		# where k is a string (a key) that represents the time interval
+		# from start to end (which are dates, inclusive).
+		# This will help map an arbitrary date onto the string representing
+		# the interval in which that date falls
+		date_keys = []
+
+		# Make a date iterator to yield the desired interval endpoints
+		date_iterator = DateIterator(start, end, increment_by_days)
+
+		# Use the iterator and accumulate all of the key-interval 
+		# assignments
+		for interval_start, interval_end in date_iterator:
+			start_str = interval_start.strftime(self.DATE_FORMAT)
+			end_str = interval_end.strftime(self.DATE_FORMAT)
+			key = '%s-%s' % (start_str, end_str)
+			date_keys.append((key, interval_start, interval_end))
+
+		return date_keys
+
+
+	def get_date_key(self, datelike):
+		''' 
+		Returns a string, representing date range into which <datelike> 
+		falls.  <datelike> should be a date or datetime object.  
+		'''
+		if isinstance(datelike, datetime):
+			datelike = datelike.date()
+		for key, start, end in self.date_keys:
+			if datelike >= start and datelike <= end:
+				return key 
+		return None
