@@ -18,3 +18,4 @@ from grouper import chunk, group, flatten
 import patterns
 from logging import trace
 from io import out
+from vectorize import Vectorizer
