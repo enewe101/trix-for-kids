@@ -2,6 +2,11 @@ import re
 import subprocess
 import os
 
+
+def file_empty(file_path):
+	return os.stat(file_path).st_size == 0
+
+
 class ls(object):
 
 	'''
