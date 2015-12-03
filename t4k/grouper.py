@@ -1,5 +1,112 @@
 import math
 
+
+def _validate_normalize_slice_indices(list_obj, start, stop):
+
+	# Fail if list_item doesn't support indexing
+	if not hasattr(list_obj, '__getitem__'):
+		raise ValueError('Cannot index into list_obj.')
+
+	# Fail if list_item doesn't support indexing
+	if not hasattr(list_obj, '__getitem__'):
+		raise ValueError('Cannot index into list_obj.')
+
+	# If stop is not defined, set it equal to len(list_obj)
+	the_len = len(list_obj)
+	if stop is None:
+		stop = the_len
+
+	# Convert negative indices into equivalent positive form
+	if start < 0:
+		start = start + the_len
+	if stop < 0:
+		stop = stop + the_len
+
+	# trim start and stop to within the list's actual length
+	start = max(0, start)
+	stop = min(the_len, stop)
+
+	## Fail if start is greater than stop
+	#if start > stop:
+	#   	raise ValueError('start cannot be greater than stop.')
+
+	return start, stop
+
+
+def lindex(list_obj, item, start=0, stop=None):
+
+	''' 
+	find the index of first occurence of <item> in <list_obj>, within 
+	the slice defined by <start> and <stop>.  Start and stop work
+	the way normal list slicing does.  By default, start is 0 and stop
+	is the length of the list.  If stop is not given, <list_obj> must
+	define __len__().
+	'''
+
+	start, stop = _validate_normalize_slice_indices(list_obj, start, stop)
+
+	# find the index of item
+	cur_idx = start
+	while cur_idx < stop:
+		try:
+			if list_obj[cur_idx] == item:
+				return cur_idx
+		except IndexError:
+			pass
+		cur_idx += 1
+
+	# Item is not in the list
+	raise ValueError(
+		'%s is not in that part of the list.' 
+		% str(item)
+	)
+
+
+
+def rindex(list_obj, item, start=0, stop=None):
+
+	''' 
+	find the index of first occurence of <item> in <list_obj>, within 
+	the slice defined by <start> and <stop>.  Start and stop work
+	the way normal list slicing does.  By default, start is 0 and stop
+	is the length of the list.  If stop is not given, <list_obj> must
+	define __len__().
+	'''
+
+	start, stop = _validate_normalize_slice_indices(list_obj, start, stop)
+
+	# find the index of item
+	cur_idx = stop - 1
+	while cur_idx >= start:
+		try:
+			if list_obj[cur_idx] == item:
+				return cur_idx
+		except IndexError:
+			pass
+		cur_idx -= 1
+
+	# Item is not in the list
+	raise ValueError(
+		'%s is not in that part of the list.' 
+		% str(item)
+	)
+
+
+def indices(list_obj, item, start=0, stop=None):
+	idxs = []
+
+	try:
+		while True:
+			idx = lindex(list_obj, item, start, stop)
+			idxs.append(idx)
+			start = idx + 1
+	except ValueError:
+		pass
+
+	return idxs
+		
+
+
 def flatten(iterable, recurse=False, depth=0):
 	'''
 	flattens an iterable of iterables into a simple list.  E.g.
