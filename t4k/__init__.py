@@ -19,3 +19,4 @@ import patterns
 from logging import trace
 from io import out
 from vectorize import Vectorizer
+from json import json_get_fast
