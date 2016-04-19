@@ -4,3 +4,4 @@
 *.swo
 dist
 test_dict
+build

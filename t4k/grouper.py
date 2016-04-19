@@ -1,6 +1,7 @@
 import math
 
 
+
 def _validate_normalize_slice_indices(list_obj, start, stop):
 
 	# Fail if list_item doesn't support indexing
@@ -105,6 +106,86 @@ def indices(list_obj, item, start=0, stop=None):
 
 	return idxs
 		
+
+def skip(list_obj, skip_slices):
+	'''
+	Returns a copy of list obj with elements ommited.  The ommited elements
+	are specified by skip_slices, a list of tuples specifying spans of
+	elements to skip using slice notation.
+
+	-- Input --
+	skip_slices: a list of 2-tuples, each consisting of start and stop
+		indices specifying spans of elements to be ommitted from list_obj
+		
+	list_obj: a list.
+	
+	-- Returns --
+	censored_list: a list that doesn't contain the elements that
+		would be selected by treating the tuples in skip_slices as
+		slice indices.
+	'''
+
+	# We begin by normalizing the slice indices.  First, convert all
+	# occurrences of None into integers.  
+	skip_slices_no_none = []
+	for start, stop in skip_slices:
+
+		# When None is used as a start index, it is equivalent to 0
+		if start is None:
+			start = 0
+
+		# When None is used as a stop index, it is equivalent to len(list)
+		if stop is None:
+			stop = len(list_obj)
+
+		# Append the equivalent slice defined using only integers
+		skip_slices_no_none.append((start,stop))
+	
+	# To assemble the 
+	# censored list, we need the slice indices sorted by start-index.
+	# We also need to handle cases where the spans defined by slice
+	# indices overlap.  When slice indices overlap, there are two cases.
+	# In the simple case, the spans overlap a little, but in the second
+	# case, the first span subsumes the second.  We need to eliminate
+	# occurrences of the second kind.  We can simply drop the subsumed
+	# span since it is redundant anyway.
+	normalized_skip_slices = []
+	for i, (start, stop) in enumerate(sorted(skip_slices_no_none)):
+
+		# On the first iteration, just keep the first slice and move on
+		if i == 0:
+			normalized_skip_slices.append((start,stop))
+			prev_start, prev_stop = start, stop
+
+		# This means that the current slice is subsumed by the previous.
+		# We simply don't include it
+		elif prev_stop > stop:
+			pass
+
+		# The normal case: prev span doesn't subsume current span, so it
+		# is safe to add it.
+		else:
+			normalized_skip_slices.append((start,stop))
+			prev_start, prev_stop = start, stop
+
+	# Now that the skip slices are sorted and there are no subsumed
+	# spans, we proceed as follows.  Start with an empty list, and 
+	# for each span, add the part of the list which comes before the
+	# current span's start but after the previous span's stop
+	censored_list = []
+	prev_stop = None
+	for start, stop in normalized_skip_slices:
+		censored_list.extend(list_obj[prev_stop:start])
+		prev_stop = stop
+
+	censored_list.extend(list_obj[prev_stop:None])
+
+	return censored_list
+
+
+
+
+
 
 
 def flatten(iterable, recurse=False, depth=0):
