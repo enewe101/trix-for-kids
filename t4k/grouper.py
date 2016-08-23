@@ -1,6 +1,43 @@
 import math
 
 
+class IncrementingMap(dict):
+
+	def add(self, key):
+		if key not in self:
+			self[key] = self.get_incrementing_id()
+			self._get_keys().append(key)
+
+
+	def get_incrementing_id(self):
+		try:
+			self._current_id += 1
+		except AttributeError:
+			self._current_id = 0
+		return self._current_id
+
+
+	def _get_keys(self):
+		'''
+		This getter is private, and covers the case where self._keys is not 
+		yet defined.  The first time it is called, self._keys is initialized
+		to be an empty list.
+		'''
+		try:
+			return self._keys
+		except AttributeError:
+			self._keys = []
+			return self._keys
+
+
+	def key(self, idx):
+		return self._get_keys()[idx]
+
+
+	def keys(self):
+		return [k for k in self._get_keys()]
+
+
 
 def _validate_normalize_slice_indices(list_obj, start, stop):
 
@@ -275,6 +312,34 @@ def chunk(iterable, chunk_size):
 			chunks.append(this_chunk)
 
 	return chunks
+
+
+def rangify(iterable):
+	'''
+	Converts a list of indices into a list of ranges (compatible with the
+	range function).  E.g. [1,2,3,7,8,9] becomes [(1,4),(7,10)].
+	The iterable provided must be sorted. Duplicate indices are ignored.  
+	'''
+	ranges = []
+	last_idx = None
+	for idx in iterable:
+
+		if last_idx is None:
+			start = idx
+
+		elif idx - last_idx > 1:
+			ranges.append((start, last_idx + 1))
+			start = idx
+
+		last_idx = idx
+
+	if last_idx is not None:
+		type(ranges)
+		ranges.append((start, last_idx + 1))
+
+	return ranges
+
+
 
 
 

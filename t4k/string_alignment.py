@@ -1,4 +1,4 @@
-import t4k
+from safe import safe_min, safe_lte
 
 def string_distance(s1, s2):
 	sa = StringAligner()
@@ -67,16 +67,16 @@ class StringAligner(object):
 				if j > 0:
 					insert_dist = distance[i][j-1] + 1
 
-				distance[i][j] = t4k.safe_min(
+				distance[i][j] = safe_min(
 					match_dist, del_dist, insert_dist)
 
-				if t4k.safe_lte(match_dist, del_dist):
-					if t4k.safe_lte(match_dist, insert_dist):
+				if safe_lte(match_dist, del_dist):
+					if safe_lte(match_dist, insert_dist):
 						path[i][j] = self.DIAG
 					else:
 						path[i][j] = self.LEFT
 
-				elif t4k.safe_lte(del_dist, insert_dist):
+				elif safe_lte(del_dist, insert_dist):
 					path[i][j] = self.UP
 
 				else:
