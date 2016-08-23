@@ -6,7 +6,7 @@ This allows you to easily persist data between non-concurrent runs of a
 program.  It's useful for keeping track of progress in long jobs.
 '''
 
-
+import math
 import atexit
 import signal
 import time
@@ -18,34 +18,44 @@ import os
 import re
 import copy
 from file_utils import ls
+import gzip
 
 
-class DuplicateKeyException(Exception):
+LINES_PER_FILE = 1000
+
+
+# Define Exceptions for the PersistentOrderedDict class and its subclasses
+class PersistentOrderedDictException(Exception):
+	pass
+class DuplicateKeyException(PersistentOrderedDictException):
+	pass
+class PersistentOrderedDictIntegrityException(PersistentOrderedDictException):
 	pass
 
 
 class PersistentOrderedDict(object):
 
-	LINES_PER_FILE = 1000
 	ESCAPE_TAB_PATTERN = re.compile('\t')
 	UNESCAPE_TAB_PATTERN = re.compile(r'(?P<prefix>^|[^\\])\\t')
 	ESCAPE_SLASH_PATTERN = re.compile(r'\\')
 	UNESCAPE_SLASH_PATTERN = re.compile(r'\\\\')
 
 
-	def __init__(self, path):
+	def __init__(
+		self, 
+		path,
+		gzipped=False,
+		lines_per_file=LINES_PER_FILE,
+		verbose=False
+	):
+
 		self.path = path
+		self.lines_per_file = lines_per_file
+		self.gzipped = gzipped
+		self.verbose = verbose
 
-		# if the path doesn't exist, make it
-		if not os.path.exists(path):
-			os.makedirs(path)
-
-		# if the path exists but points to a file, raise
-		elif os.path.isfile(path):
-			raise IOError(
-				'The path given to PersistentOrderedDict should correspond '
-				'to a folder.  A file was found instead: %s' % path
-			)
+		self.set_write_method(gzipped)
+		self.ensure_path(path)
 
 		# read in all data (if any)
 		self.read()
@@ -58,6 +68,44 @@ class PersistentOrderedDict(object):
 
 		# Always be sure to synchronize before the script exits
 		atexit.register(self.unhold)
+
+
+	def set_write_method(self, gzipped):
+
+		if gzipped:
+			self.open = gzip.open
+		else:
+			self.open = open
+
+
+	def ensure_path(self, path):
+
+		# if the path doesn't exist, make it
+		if not os.path.exists(path):
+			os.makedirs(path)
+
+		# if the path exists but points to a file, raise
+		elif os.path.isfile(path):
+			raise IOError(
+				'The path given to PersistentOrderedDict should correspond '
+				'to a folder.  A file was found instead: %s' % path
+			)
+
+
+	def copy(self, path, lines_per_file, gzipped=False):
+
+		self.gzipped = gzipped
+		self.path = path
+		self.lines_per_file = lines_per_file
+
+		self.set_write_method(gzipped)
+		self.ensure_path(path)
+
+		num_files = int(math.ceil(
+			len(self.data) / float(self.lines_per_file)
+		))
+		self.dirty_files = set(range(num_files))
+		self.sync()
 
 
 	def hold(self):
@@ -83,6 +131,13 @@ class PersistentOrderedDict(object):
 		return copy.deepcopy([self.data[k] for k in self.key_order])
 
 
+	def path_from_int(self, i):
+		if self.gzipped:
+			return os.path.join(self.path, '%d.json.gz' % i)
+		else:
+			return os.path.join(self.path, '%d.json' % i)
+
+
 	def read(self):
 
 		self.key_order = []
@@ -92,21 +147,24 @@ class PersistentOrderedDict(object):
 		i=0
 		for fname in ls(self.path):
 
+			if self.verbose:
+				print fname
+
 			# ensure that files are in expected order,
 			# that none are missing, and that no lines are missing.
-			try:
-				assert(fname == os.path.join(self.path, '%d.json' % i))
-			except AssertionError:
-				print fname
-				print os.path.join(self.path, '%d.json' % i)
-				raise
-			if i > 0:
-				prev_file_path = os.path.join(self.path, '%d.json' % (i-1))
-				num_lines_prev_file = len(
-					open(prev_file_path, 'r').readlines()
+			if fname != self.path_from_int(i):
+				raise PersistentOrderedDictIntegrityException(
+					'Expected %s but found %s.' 
+					% (self.path_from_int(i), fname)
 				)
-				if num_lines_prev_file != self.LINES_PER_FILE:
-					raise ValueError(
+
+			if i > 0:
+				prev_file_path = self.path_from_int(i-1)
+				num_lines_prev_file = len(
+					self.open(prev_file_path, 'r').readlines()
+				)
+				if num_lines_prev_file != self.lines_per_file:
+					raise PersistentOrderedDictIntegrityException(
 						"PersistentOrderedDict: "
 						"A file on disk appears to be corrupted, because "
 						"it's missing lines: %s " % prev_file_path
@@ -114,7 +172,7 @@ class PersistentOrderedDict(object):
 
 			i += 1
 
-			for entry in open(os.path.join(fname)):
+			for entry in self.open(os.path.join(fname)):
 
 				# skip blank lines (there's always one at end of file)
 				if entry=='':
@@ -136,7 +194,7 @@ class PersistentOrderedDict(object):
 
 		key = self.ensure_unicode(key)
 		index = self.index_lookup[key]
-		file_num = index / self.LINES_PER_FILE
+		file_num = index / self.lines_per_file
 		self.dirty_files.add(file_num)
 
 
@@ -152,12 +210,16 @@ class PersistentOrderedDict(object):
 		for file_num in self.dirty_files:
 
 			# Get the dirty file
-			fname =  '%d.json' % file_num
-			f = open(os.path.join(self.path, fname), 'w')
+			try:
+				path =  self.path_from_int(file_num)
+			except TypeError:
+				print file_num
+				raise
+			f = self.open(path, 'w')
 
 			# Go through keys mapped to this file and re-write them
-			start = file_num * self.LINES_PER_FILE
-			stop = start + self.LINES_PER_FILE
+			start = file_num * self.lines_per_file
+			stop = start + self.lines_per_file
 			for key in self.key_order[start:stop]:
 
 				record = self.data[key]

@@ -1,7 +1,8 @@
 from date_iterator import DateIterator, DateBinner
 from persistent_ordered_dict import (
-	PersistentOrderedDict, ProgressTracker, DuplicateKeyException, 
-	SharedProgressTracker
+	PersistentOrderedDict, ProgressTracker, DuplicateKeyException, SharedProgressTracker,
+	PersistentOrderedDictException, PersistentOrderedDictException,
+	PersistentOrderedDictIntegrityException
 )
 from safe import (
 	safe_min, safe_max, safe_lte, safe_lt, safe_gte, safe_gt
