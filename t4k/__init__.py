@@ -24,4 +24,4 @@ from logging import trace
 from io import out
 from vectorize import Vectorizer
 from js import json_get_fast
-from dictionary import invert_dict
+from dictionary import invert_dict, dzip
