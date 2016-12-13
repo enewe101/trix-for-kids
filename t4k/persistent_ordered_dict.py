@@ -347,6 +347,18 @@ class PersistentOrderedDict(object):
 		else:
 			self[key] = True
 
+
+	def add_if_absent(self, key):
+		'''
+		Same as add, but don't raise an error if the key exists, just do 
+		nothing in that case.
+		'''
+		try:
+			self.add(key)
+		except DuplicateKeyException:
+			pass
+
+
 	def convert_to_tracker(self):
 
 		# Rewrite every value to satisfy the form of a progress tracker
