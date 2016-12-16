@@ -9,7 +9,7 @@ from safe import (
 )
 from tsv import UnicodeTsvReader, UnicodeTsvWriter
 from file_utils import ls, file_empty
-from managed_process import ManagedProcess
+from managed_process import ManagedProcess, DONE, NOT_DONE, SUICIDE
 from selenium_crawler import SeleniumCrawler, uses_selenium
 from string_alignment import (
 	StringAligner, string_distance, string_align, 
