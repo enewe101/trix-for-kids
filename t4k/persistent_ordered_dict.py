@@ -128,7 +128,7 @@ class PersistentOrderedDict(object):
 
 
 	def values(self):
-		return copy.deepcopy([self.data[k] for k in self.key_order])
+		return copy.copy([self.data[k] for k in self.key_order])
 
 
 	def path_from_int(self, i):

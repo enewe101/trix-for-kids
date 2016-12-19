@@ -17,7 +17,7 @@ from string_alignment import (
 )
 from grouper import (
 	chunk, group, flatten, lindex, rindex, indices, skip, IncrementingMap,
-	rangify
+	rangify, ltrim, rtrim, trim
 )
 import patterns
 from logging import trace
@@ -27,3 +27,4 @@ from js import json_get_fast
 from dictionary import invert_dict, dzip
 from id_generator import UniqueIdGenerator, get_id
 from progress import progress
+from extrema import Max, Min

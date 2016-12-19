@@ -71,7 +71,24 @@ def _validate_normalize_slice_indices(list_obj, start, stop):
 	return start, stop
 
 
-def lindex(list_obj, item, start=0, stop=None):
+def ltrim(list_obj, item=0):
+	match = lambda x: x!=item
+	start = lindex(list_obj,match_func=match) 
+	return list_obj[start:]
+
+def rtrim(list_obj, item=0):
+	match = lambda x: x!=item
+	stop = rindex(list_obj,match_func=match)+1
+	return list_obj[:stop]
+
+def trim(list_obj, item=0):
+	match = lambda x: x!=item
+	start = lindex(list_obj,match_func=match) 
+	stop = rindex(list_obj,match_func=match)+1
+	return list_obj[start:stop]
+
+
+def lindex(list_obj, item=None, match_func=None, start=0, stop=None):
 
 	''' 
 	find the index of first occurence of <item> in <list_obj>, within 
@@ -83,25 +100,28 @@ def lindex(list_obj, item, start=0, stop=None):
 
 	start, stop = _validate_normalize_slice_indices(list_obj, start, stop)
 
+	if match_func == None:
+		if item is None:
+			raise ValueError(
+				'Either `item` or `match_func` must be specified')
+		match_func = lambda x: x==item
+
 	# find the index of item
 	cur_idx = start
 	while cur_idx < stop:
 		try:
-			if list_obj[cur_idx] == item:
+			if match_func(list_obj[cur_idx]):
 				return cur_idx
 		except IndexError:
 			pass
 		cur_idx += 1
 
 	# Item is not in the list
-	raise ValueError(
-		'%s is not in that part of the list.' 
-		% str(item)
-	)
+	raise ValueError('No match in list.')
 
 
 
-def rindex(list_obj, item, start=0, stop=None):
+def rindex(list_obj, item=None, match_func=None, start=0, stop=None):
 
 	''' 
 	find the index of first occurence of <item> in <list_obj>, within 
@@ -113,21 +133,24 @@ def rindex(list_obj, item, start=0, stop=None):
 
 	start, stop = _validate_normalize_slice_indices(list_obj, start, stop)
 
+	if match_func == None:
+		if item is None:
+			raise ValueError(
+				'Either `item` or `match_func` must be specified')
+		match_func = lambda x: x==item
+
 	# find the index of item
 	cur_idx = stop - 1
 	while cur_idx >= start:
 		try:
-			if list_obj[cur_idx] == item:
+			if match_func(list_obj[cur_idx]):
 				return cur_idx
 		except IndexError:
 			pass
 		cur_idx -= 1
 
 	# Item is not in the list
-	raise ValueError(
-		'%s is not in that part of the list.' 
-		% str(item)
-	)
+	raise ValueError('No match in list')
 
 
 def indices(list_obj, item, start=0, stop=None):
