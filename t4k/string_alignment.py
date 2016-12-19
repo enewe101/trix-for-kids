@@ -30,6 +30,17 @@ class StringAligner(object):
 	MATCH = 'm'
 	SUBSTITUTE = 's'
 
+	def __init__(
+		self,
+		case_sensitive=True,
+		deletion_penalty=1,
+		insertion_penalty=1,
+	):
+		self.deletion_penalty = deletion_penalty
+		self.insertion_penalty = insertion_penalty
+		self.case_sensitive = case_sensitive
+
+
 	def string_alignment(self, name1, name2, substring_mode=False):
 		distance = [
 			[None for j in range(len(name2)+1)] for i in range(len(name1)+1)
@@ -38,6 +49,14 @@ class StringAligner(object):
 			[None for j in range(len(name2)+1)] for i in range(len(name1)+1)
 		]
 
+		# Normalize case if option chosen for case insensitive matches
+		if not self.case_sensitive:
+			name1 = name1.lower()
+			name2 = name2.lower()
+
+		# Dynamic program computes the score for all possible sequences
+		# of matches, deletions, insertions, and substitutions that
+		# align the strings
 		for i in range(len(name1) + 1):
 			for j in range(len(name2) + 1):
 
@@ -55,7 +74,11 @@ class StringAligner(object):
 
 					# substitute character i by char j
 					else:
-						match_dist = distance[i-1][j-1] + 2
+						match_dist = (
+							distance[i-1][j-1] 
+							+ self.deletion_penalty 
+							+ self.insertion_penalty
+						)
 
 				# Delete one char from name1
 				del_dist = None
@@ -68,12 +91,12 @@ class StringAligner(object):
 
 					# Otherwise the deletion penalty of 1 is applied
 					else:
-						del_dist = distance[i-1][j] + 1
+						del_dist = distance[i-1][j] + self.deletion_penalty
 
 				# Insert one char from name2
 				insert_dist = None
 				if j > 0:
-					insert_dist = distance[i][j-1] + 1
+					insert_dist = distance[i][j-1] + self.insertion_penalty
 
 				distance[i][j] = safe_min(
 					match_dist, del_dist, insert_dist)
@@ -94,14 +117,25 @@ class StringAligner(object):
 
 
 	def substring_alignment_score(self, reference_string, substring):
-		alignment1, alignment2 = self.get_string_alignment_masks(
+		alignment_path = self.get_string_alignment_path(
 			reference_string, substring, True)
 		
-		alignment_1 = trim(alignment1)
-		mismatches = sum([not x for x in alignment_1 + alignment2])
-		matches = sum(alignment_1)
+		substring_alignment_path = trim(alignment_path, 'd')
 
-		return matches - mismatches
+		substitutions = sum([x == 's' for x in substring_alignment_path])
+		deletions = sum([x == 'd' for x in substring_alignment_path])
+		insertions = sum([x == 'i' for x in substring_alignment_path])
+		matches = sum([x == 'm' for x in substring_alignment_path])
+
+		score = (
+			matches 
+			- insertions * self.insertion_penalty
+			- deletions * self.deletion_penalty
+			- substitutions * (
+				self.deletion_penalty + self.insertion_penalty)
+		)
+
+		return score
 
 
 	def string_distance(self, name1, name2, substring_mode=False):
