@@ -17,7 +17,7 @@ from string_alignment import (
 )
 from grouper import (
 	chunk, group, flatten, lindex, rindex, indices, skip, IncrementingMap,
-	rangify, ltrim, rtrim, trim
+	rangify, ltrim, rtrim, trim, binify, inbin
 )
 import patterns
 from logging import trace

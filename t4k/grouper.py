@@ -1,4 +1,5 @@
 import math
+import hashlib
 
 
 class IncrementingMap(dict):
@@ -365,4 +366,18 @@ def rangify(iterable):
 
 
 
+def binify(string_id, num_bins):
+    ''' 
+    Uniformly assign objects to one of `num_bins` bins based on the
+    hash of their unique id string.
+    '''
+    hexdigest = hashlib.sha1(string_id).hexdigest()
+    return int(hexdigest,16) % num_bins
+
+
+def inbin(string_id, num_bins, this_bin):
+	if this_bin >= num_bins:
+		raise ValueError(
+			'`this_bin` must be an integer from 0 to `num_bins`-1.')
+	return binify(string_id, num_bins) == this_bin
 
