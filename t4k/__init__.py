@@ -1,3 +1,4 @@
+from multiprocessing_utils import cpus
 from date_iterator import DateIterator, DateBinner
 from persistent_ordered_dict import (
 	PersistentOrderedDict, ProgressTracker, DuplicateKeyException, SharedProgressTracker,
