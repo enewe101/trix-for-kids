@@ -25,7 +25,7 @@ from logging import trace
 from io import out
 from vectorize import Vectorizer
 from js import json_get_fast
-from dictionary import invert_dict, dzip
+from dictionary import invert_dict, dzip, merge_dicts
 from id_generator import UniqueIdGenerator, get_id
 from progress import progress
 from extrema import Max, Min
