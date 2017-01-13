@@ -7,6 +7,15 @@ def file_empty(file_path):
 	return os.stat(file_path).st_size == 0
 
 
+def ensure_exists(path):
+	"""
+	Ensure that the given path exists, by creating it if it doesn't.  If the
+	path exists but is a file, an `OSError` would be raised.
+	"""
+	if not os.path.exists(path):
+		os.makedirs(path)	
+
+
 class ls(object):
 
 	'''
