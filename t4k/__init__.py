@@ -1,3 +1,4 @@
+from multiprocessing_utils import cpus
 from date_iterator import DateIterator, DateBinner
 from persistent_ordered_dict import (
 	PersistentOrderedDict, ProgressTracker, DuplicateKeyException, SharedProgressTracker,
@@ -8,7 +9,7 @@ from safe import (
 	safe_min, safe_max, safe_lte, safe_lt, safe_gte, safe_gt
 )
 from tsv import UnicodeTsvReader, UnicodeTsvWriter
-from file_utils import ls, file_empty
+from file_utils import ls, file_empty, ensure_exists
 from managed_process import ManagedProcess, DONE, NOT_DONE, SUICIDE
 from selenium_crawler import SeleniumCrawler, uses_selenium
 from string_alignment import (
@@ -17,14 +18,14 @@ from string_alignment import (
 )
 from grouper import (
 	chunk, group, flatten, lindex, rindex, indices, skip, IncrementingMap,
-	rangify, ltrim, rtrim, trim
+	rangify, ltrim, rtrim, trim, binify, inbin
 )
 import patterns
 from logging import trace
 from io import out
 from vectorize import Vectorizer
 from js import json_get_fast
-from dictionary import invert_dict, dzip
+from dictionary import invert_dict, dzip, merge_dicts
 from id_generator import UniqueIdGenerator, get_id
 from progress import progress
 from extrema import Max, Min

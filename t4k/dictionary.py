@@ -6,6 +6,13 @@ def invert_dict(dictionary):
 	return new_dict
 
 
+def merge_dicts(*dictionaries):
+	merged = {}
+	for dictionary in reversed(dictionaries):
+		merged.update(dictionary)
+	return merged
+
+
 def dzip(*dictionaries):
 	'''
 	Like zip, but for dictionaries.  Produce a dictionary whose keys are 
