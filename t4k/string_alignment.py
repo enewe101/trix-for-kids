@@ -16,8 +16,9 @@ def string_align_masks(s1, s2):
 def string_align_path(s1, s2):
 	return SA.get_string_alignment_path(s1, s2)
 
-def substring_alignment_score(s1, s2):
-	return SA.substring_alignment_score(s1, s2)
+def alignment_score(s1, s2, as_substring=False):
+	return SA.alignment_score(s1, s2, as_substring)
+
 
 class StringAligner(object):
 
@@ -116,16 +117,17 @@ class StringAligner(object):
 		return distance, path
 
 
-	def substring_alignment_score(self, reference_string, substring):
+	def alignment_score(self, reference_string, query_string, as_substring):
 		alignment_path = self.get_string_alignment_path(
-			reference_string, substring, True)
+			reference_string, query_string, as_substring)
 		
-		substring_alignment_path = trim(alignment_path, 'd')
+		if as_substring:
+			alignment_path = trim(alignment_path, 'd')
 
-		substitutions = sum([x == 's' for x in substring_alignment_path])
-		deletions = sum([x == 'd' for x in substring_alignment_path])
-		insertions = sum([x == 'i' for x in substring_alignment_path])
-		matches = sum([x == 'm' for x in substring_alignment_path])
+		substitutions = sum([x == 's' for x in alignment_path])
+		deletions = sum([x == 'd' for x in alignment_path])
+		insertions = sum([x == 'i' for x in alignment_path])
+		matches = sum([x == 'm' for x in alignment_path])
 
 		score = (
 			matches 
