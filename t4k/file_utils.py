@@ -119,7 +119,7 @@ class PathLister(object):
 		the constructor.
 		'''
 		self.walker = os.walk(self.path)
-		self.items = []
+		self.next_dir()
 		if self.iteritems:
 			return self._generate()
 		else:
