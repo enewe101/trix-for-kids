@@ -9,9 +9,9 @@ from safe import (
 	safe_min, safe_max, safe_lte, safe_lt, safe_gte, safe_gt
 )
 from tsv import UnicodeTsvReader, UnicodeTsvWriter
-from file_utils import ls, file_empty, ensure_exists
+from file_utils import ls, file_empty, ensure_exists, ensure_removed
 from managed_process import ManagedProcess, DONE, NOT_DONE, SUICIDE
-from selenium_crawler import SeleniumCrawler, uses_selenium
+#from selenium_crawler import SeleniumCrawler, uses_selenium
 from string_alignment import (
 	StringAligner, string_distance, string_align, 
 	string_align_masks, string_align_path, substring_alignment_score
@@ -21,9 +21,9 @@ from grouper import (
 	rangify, ltrim, rtrim, trim, binify, inbin
 )
 import patterns
-from logging import trace
-from io import out
-from vectorize import Vectorizer
+from trace import trace, get_trace
+from io_util import out
+#from vectorize import Vectorizer
 from js import json_get_fast
 from dictionary import invert_dict, dzip, merge_dicts
 from id_generator import UniqueIdGenerator, get_id

@@ -70,69 +70,72 @@ def test_concurrent_write(tracker, name):
 		tracker.unhold()
 
 
-if __name__=='__main__':
-	# Remove pre-existing left-over test files from previous test
-	shutil.rmtree('test_dict')
-
-	# Run tests
-	run_test2()
-	run_test1()
 
 
 
 # Tried doing this using a manager
-#
-#POD_PUBLIC_METHODS = [
-#	'hold',
-#	'unhold',
-#	'keys',
-#	'values',
-#	'read',
-#	'mark_dirty',
-#	'sync',
-#	'escape_key',
-#	'__iter__',
-#	'next',
-#	'__contains__',
-#	'__len__',
-#	'__getitem__',
-#	'ensure_unicode',
-#	'update',
-#	'__setitem__',
-#	'check_or_add',
-#	'set_item',
-#	'set',
-#	'check',
-#	'add',
-#	'increment_tries',
-#	'reset_tries',
-#	'mark_done',
-#	'mark_not_done',
-#]
-#
-#def test_manager():
-#
-#	class MyManager(BaseManager):
-#		pass
-#
-#	MyManager.register(
-#		'ProgressTracker', t4k.ProgressTracker, exposed=POD_PUBLIC_METHODS
-#	)
-#	manager = MyManager()
-#	manager.start()
-#
-#	tracker = manager.ProgressTracker('test_dict')
-#
-#	p1 = multiprocessing.Process(
-#		target=test_concurrent_write, args=(tracker,'A'))
-#	p2 = multiprocessing.Process(
-#		target=test_concurrent_write, args=(tracker,'B'))
-#
-#	p1.start()
-#	p2.start()
-#
-#	p1.join()
-#	p2.join()
-#
-#	print tracker['yo']
 
+POD_PUBLIC_METHODS = [
+	'hold',
+	'unhold',
+	'keys',
+	'values',
+	'read',
+	'mark_dirty',
+	'sync',
+	'escape_key',
+	'__iter__',
+	'next',
+	'__contains__',
+	'__len__',
+	'__getitem__',
+	'ensure_unicode',
+	'update',
+	'__setitem__',
+	'check_or_add',
+	'set_item',
+	'set',
+	'check',
+	'add',
+	'increment_tries',
+	'reset_tries',
+	'mark_done',
+	'mark_not_done',
+]
+
+
+def test_manager():
+
+	class MyManager(BaseManager):
+		pass
+
+	MyManager.register(
+		'ProgressTracker', t4k.ProgressTracker, exposed=POD_PUBLIC_METHODS
+	)
+	manager = MyManager()
+	manager.start()
+
+	tracker = manager.ProgressTracker('test_dict')
+
+	p1 = multiprocessing.Process(
+		target=test_concurrent_write, args=(tracker,'A'))
+	p2 = multiprocessing.Process(
+		target=test_concurrent_write, args=(tracker,'B'))
+
+	p1.start()
+	p2.start()
+
+	p1.join()
+	p2.join()
+
+	print tracker['yo']
+
+
+if __name__=='__main__':
+	# Remove pre-existing left-over test files from previous test
+	t4k.ensure_removed('test_dict')
+
+	# Run tests
+	#test_manager()
+	#run_test2()
+	run_test1()

@@ -17,6 +17,7 @@ setup(
 		'Natural Language :: English',
 		'Topic :: Utilities',
 	],
-	keywords='trix are for kids'
+	keywords='trix are for kids',
+	install_requires=['psutil', 'natsort']
 )
 

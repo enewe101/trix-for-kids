@@ -13,7 +13,7 @@ def trace():
 def get_trace():
 	'''
 		Similar to get_trace, but returns an array of strings, each one
-		matching a stack frame.  See trace() for more detailed explanation.
+		matching a stack frame.  See trace().
 	'''
 	# get the stack trace.  
 	trc = traceback.format_stack()

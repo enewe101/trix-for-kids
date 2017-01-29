@@ -145,7 +145,7 @@ class PersistentOrderedDict(object):
 		self.data = {}
 
 		i=0
-		for fname in ls(self.path):
+		for fname in ls(self.path, dirs=False):
 
 			if self.verbose:
 				print fname

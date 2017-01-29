@@ -1,3 +1,5 @@
+from natsort import humansorted
+import shutil
 import re
 import subprocess
 import os
@@ -6,6 +8,12 @@ import os
 def file_empty(file_path):
 	return os.stat(file_path).st_size == 0
 
+def ensure_removed(path):
+	"""
+	Ensure that the given path does not exist, by removing it if necessary.
+	"""
+	if os.path.exists(path):
+		shutil.rmtree(path)	
 
 def ensure_exists(path):
 	"""
@@ -16,18 +24,46 @@ def ensure_exists(path):
 		os.makedirs(path)	
 
 
-class ls(object):
+def ls(
+	path,
+	files=True,
+	dirs=True,
+	match=None,
+	exclude=None,
+	absolute=False,
+	recurse=False,
+	list_all=False,
+	natural_sort=True,
+	iteritems=False
+):
+
+	lister = PathLister(
+		path=path,
+		files=files,
+		dirs=dirs,
+		match=match,
+		exclude=exclude,
+		absolute=absolute,
+		recurse=recurse,
+		list_all=list_all,
+		natural_sort=natural_sort,
+		iteritems=iteritems
+	)
+	return lister.generate()
+
+
+class PathLister(object):
 
 	'''
 		Iterator for listing all files in a directory.
 		- Lists files found under path, unless <files> is False
 		- Can also list directories, if <dirs> is True
-		- Only files (and directories) matching <whitelist> 
-			will be returned, unless they also match <blacklist>.
+		- Only files (and directories) matching <match> 
+			will be returned, unless they also match <exclude>.
 		- By default, doesn't descend into subdirectories, unless
 			<recurse> is True, lists files in subdirs too.
-		- If <recurse> is True, only directories matching <whitelist>
-			and not matching <blacklist> will be followed
+		- If <recurse> is True, only directories matching <match>
+			and not matching <exclude> will be followed
 		- Paths to files are returned relative to <path>, unless <absolute>
 			is true, then absolute paths are returned
 		- Files are listed in natural sort ordering (i.e. respecting
@@ -42,23 +78,25 @@ class ls(object):
 		self,
 		path,
 		files=True,
-		dirs=False,
-		whitelist='.*',
-		blacklist='^$',
+		dirs=True,
+		match=None,
+		exclude=None,
 		absolute=False,
 		recurse=False,
-		list_all=False,
+		list_all=True,
 		natural_sort=True,
+		iteritems=False
 	):
 		self.path = path
 		self.files = files
 		self.dirs = dirs
-		self.whitelist = re.compile(whitelist)
-		self.blacklist = re.compile(blacklist)
+		self.match = None if match is None else re.compile(match)
+		self.exclude = None if exclude is None else re.compile(exclude)
 		self.absolute = absolute
 		self.recurse = recurse
 		self.list_all = list_all
 		self.natural_sort = natural_sort
+		self.iteritems=iteritems
 
 
 	def filter_back_pointers(self, dirs):
@@ -71,51 +109,86 @@ class ls(object):
 		)
 
 
-	def __iter__(self):
-		self.yield_files, self.yield_dirs = self._ls(self.path)
-		self.visit_dirs = list(self.yield_dirs)
-		return self
+	def generate(self):
+		'''
+		Either return the path generator, or a list of paths, depending on 
+		the constructor.
+		'''
+		self.walker = os.walk(self.path)
+		self.next_dir()
+		if self.iteritems:
+			return self._generate()
+		else:
+			return [item for item in self._generate()]
 
 
-	def next(self):
-		'''
-			yield the next item, and absolutize the path if necessary
-		'''
-		next_item = self.get_next()
+	def next_dir(self):
+		cur_path, cur_dirs, cur_files = self.walker.next()
+
+		# First reletavize cur_path to current working directory (by default
+		# it's reletavized to the path given in the constructor)
+		cur_path = os.path.relpath(cur_path, '.')
+
+		# Do we want the files, the directories, both?
+		if self.files:
+			self.items = cur_files
+		else:
+			self.items = []
+		if self.dirs:
+			self.items.extend(cur_dirs)
+
+		# Absolutize the paths if that's what was specified in the constructor
 		if self.absolute:
-			return os.path.abspath(next_item)
-		return next_item
+			self.items = [
+				os.path.abspath(os.path.join(cur_path, d)) for d in self.items
+			]
+
+		# Otherwise reletavize the files to the current working directory
+		# But only necessary if cur_path isn't the current working directory
+		elif cur_path != '.':
+			self.items = [os.path.join(cur_path, f) for f in self.items]
+
+		# Sort the items either "naturally" or alphabetically
+		if self.natural_sort:
+			self.items = humansorted(self.items, reverse=True)
+		else:
+			self.items.sort(reverse=True)
+
+		# Filter items against the exclude and match if any
+		if self.match is not None:
+			self.items = [i for i in self.items if self.match.search(i)]
+		if self.exclude is not None:
+			self.items = [i for i in self.items if not self.exclude.search(i)]
+
+
+	def _generate(self):
+		'''
+			yield the next item, and absolutize the path if necessary.
+		'''
+		# We'll break out of this loop when stopIteration is raised by 
+		# the call to self.get_next()
+		while True:
+			yield self.get_next()
 
 
 	def get_next(self):
 
 		while True:
 
-			# Try popping off the next file, if we're yielding files
+			# Try popping off the next item
 			if self.files:
 				try:
-					return self.yield_files.pop()
+					return self.items.pop()
 				except IndexError:
 					pass
 
-			# Try popping off the next dir, if we're yielding dirs
-			if self.dirs:
-				try:
-					return self.yield_dirs.pop()
-				except IndexError:
-					pass
-
-			# Try looking in the next dir
+			# If there's no more items, and if we're in recursive mode, 
+			# descend into the next directory
 			if self.recurse:
-				try:
-					next_dir = self.visit_dirs.pop()
-				except IndexError:
-					raise StopIteration
-				else:
-					self.yield_files, self.yield_dirs = self._ls(next_dir)
-					self.visit_dirs.extend(self.yield_dirs)
+				self.next_dir()
+				return self.get_next()
 
-			# If not recursive, then we're done
+			# And if we're not in recursive mode, then we're done
 			else:
 				raise StopIteration
 
@@ -123,10 +196,12 @@ class ls(object):
 	def _ls(self, path, filter_back_pointers=True):
 
 		# Ask OS to list the files and directories in path
-		if self.list_all:
-			list_command = ['ls', '-a', path]
-		else:
-			list_command = ['ls', path]
+
+		#if self.list_all:
+		#	items = check_output(['ls', '-a', path]).split()
+		#else:
+		#	items = check_output(['ls', path]).split()
+
 		ls = subprocess.Popen(list_command, stdout=subprocess.PIPE)
 
 
@@ -148,11 +223,17 @@ class ls(object):
 		dirs = []
 		for item in items:
 
-			# Skip if it doesn't match whitelist, or does match blacklist
-			if (
-				not self.whitelist.search(item) 
-				or self.blacklist.search(item)
-			):
+			# Skip if it doesn't match match, or does match exclude
+			whitelist_match = (
+				True if self.match is None 
+				else self.match.search(item) 
+			)
+			blacklist_match = (
+				false if self.exclude is None
+				else self.exclude.search(item)
+			)
+			print blacklist_match
+			if not whitelist_match or blacklist_match:
 				continue
 
 			# Append files to the list of files
