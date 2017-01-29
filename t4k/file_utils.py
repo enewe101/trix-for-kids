@@ -106,6 +106,10 @@ class PathLister(object):
 		self.natural_sort = natural_sort
 		self.iteritems=iteritems
 
+		# Validation -- make sure self.path exists
+		if not os.path.exists(self.path):
+			raise OSError('no such file or directory: %s' % self.path)
+
 
 	def filter_back_pointers(self, dirs):
 		'''
@@ -123,7 +127,7 @@ class PathLister(object):
 		the constructor.
 		'''
 		self.walker = os.walk(self.path)
-		self.next_dir()
+		self.items = []
 		if self.iteritems:
 			return self._generate()
 		else:
@@ -194,11 +198,10 @@ class PathLister(object):
 		while True:
 
 			# Try popping off the next item
-			if self.files:
-				try:
-					return self.items.pop()
-				except IndexError:
-					pass
+			try:
+				return self.items.pop()
+			except IndexError:
+				pass
 
 			# If there's no more items, and if we're in recursive mode, 
 			# descend into the next directory
