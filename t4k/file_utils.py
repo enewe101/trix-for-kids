@@ -31,6 +31,7 @@ def ls(
 	match=None,
 	exclude=None,
 	absolute=False,
+	basename=False,
 	recurse=False,
 	list_all=False,
 	natural_sort=True,
@@ -44,6 +45,7 @@ def ls(
 		match=match,
 		exclude=exclude,
 		absolute=absolute,
+		basename=basename,
 		recurse=recurse,
 		list_all=list_all,
 		natural_sort=natural_sort,
@@ -52,6 +54,9 @@ def ls(
 	return lister.generate()
 
 
+ABSOLUTE = 0
+RELATIVE = 1
+BASENAME = 2
 class PathLister(object):
 
 	'''
@@ -82,6 +87,7 @@ class PathLister(object):
 		match=None,
 		exclude=None,
 		absolute=False,
+		basename=False,
 		recurse=False,
 		list_all=True,
 		natural_sort=True,
@@ -92,7 +98,9 @@ class PathLister(object):
 		self.dirs = dirs
 		self.match = None if match is None else re.compile(match)
 		self.exclude = None if exclude is None else re.compile(exclude)
-		self.absolute = absolute
+		self.relative = (
+			ABSOLUTE if absolute else BASENAME if basename else RELATIVE
+		)
 		self.recurse = recurse
 		self.list_all = list_all
 		self.natural_sort = natural_sort
@@ -138,15 +146,25 @@ class PathLister(object):
 			self.items.extend(cur_dirs)
 
 		# Absolutize the paths if that's what was specified in the constructor
-		if self.absolute:
+		if self.relative == ABSOLUTE:
 			self.items = [
 				os.path.abspath(os.path.join(cur_path, d)) for d in self.items
 			]
 
 		# Otherwise reletavize the files to the current working directory
 		# But only necessary if cur_path isn't the current working directory
-		elif cur_path != '.':
-			self.items = [os.path.join(cur_path, f) for f in self.items]
+		elif self.relative == RELATIVE:
+			if cur_path != '.':
+				self.items = [os.path.join(cur_path, f) for f in self.items]
+
+		# If we want to keep the basename, nothing needs to be done
+		elif self.relative == BASENAME:
+			pass
+
+		else:
+			raise ValueError(
+				'Unexpected value for self.relative: %s' % self.relative
+			)
 
 		# Sort the items either "naturally" or alphabetically
 		if self.natural_sort:
