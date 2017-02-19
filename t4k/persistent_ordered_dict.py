@@ -105,7 +105,7 @@ class PersistentOrderedDict(object):
 			len(self.data) / float(self.lines_per_file)
 		))
 		self.dirty_files = set(range(num_files))
-		self.sync()
+		self.maybe_sync()
 
 
 	def hold(self):
@@ -120,7 +120,7 @@ class PersistentOrderedDict(object):
 		Resume writing updates to file, synchronize any dirty files.
 		'''
 		self._hold = False
-		self.sync()
+		self.maybe_sync()
 
 
 	def keys(self):
@@ -198,15 +198,19 @@ class PersistentOrderedDict(object):
 		self.dirty_files.add(file_num)
 
 
+	def maybe_sync(self):
+		"""
+		Write changes that have been made if self isn't under a "hold".
+		"""
+		# To limit I/O consumption, sync'in is dactivated when hold is on.  
+		if not self._hold:
+			self.sync()
+
+
 	def sync(self):
-
-		#graceful = GracefulDeath()
-
-		# No synchronization happens when hold is on.  This reduces I/O
-		# when many values need to be updated
-		if self._hold:
-			return
-
+		"""
+		Write any changes that have been made to the datastructure to disk.
+		"""
 		for file_num in self.dirty_files:
 
 			# Get the dirty file
@@ -229,9 +233,6 @@ class PersistentOrderedDict(object):
 
 		# No more dirty files
 		self.dirty_files = set()
-		#if graceful.kill_now:
-		#	print 'dying gracefully'
-		#	sys.exit(0)
 
 
 	def escape_key(self, key):
@@ -298,7 +299,7 @@ class PersistentOrderedDict(object):
 		'''
 		key = self.ensure_unicode(key)
 		self.mark_dirty(key)
-		self.sync()
+		self.maybe_sync()
 
 
 	def set_item(self, key, val):
@@ -314,7 +315,7 @@ class PersistentOrderedDict(object):
 		# update the value held at <key>
 		self.data[key] = val
 		self.mark_dirty(key)
-		self.sync()
+		self.maybe_sync()
 
 
 	def __setitem__(self, key, val):
@@ -330,7 +331,7 @@ class PersistentOrderedDict(object):
 		# update the value held at <key>
 		self.data[key] = val
 		self.mark_dirty(key)
-		self.sync()
+		self.maybe_sync()
 
 
 	def set(self, key, subkey, value):

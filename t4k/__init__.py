@@ -29,3 +29,4 @@ from dictionary import invert_dict, dzip, merge_dicts
 from id_generator import UniqueIdGenerator, get_id
 from progress import progress
 from extrema import Max, Min
+from sample import reservoir_sample
