@@ -10,6 +10,11 @@ class IncrementingMap(dict):
 			self._get_keys().append(key)
 
 
+	def add_many(self, keys_iterator):
+		for key in keys_iterator:
+			self.add(key)
+
+
 	def get_incrementing_id(self):
 		try:
 			self._current_id += 1
