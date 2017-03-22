@@ -30,3 +30,6 @@ from id_generator import UniqueIdGenerator, get_id
 from progress import progress
 from extrema import Max, Min
 from sample import reservoir_sample
+from unigram_dictionary import UnigramDictionary
+from token_map import TokenMap, SILENT, WARN, ERROR, UNK
+from counter_sampler import CounterSampler
