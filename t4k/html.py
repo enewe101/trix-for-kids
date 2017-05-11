@@ -20,7 +20,7 @@ def span(attributes={}):
     return element('span', attributes)
 
 def text(text_content):
-    return DOM.createTextNode(text_content)
+    return DOM.createTextNode(str(text_content))
 
 def table(attributes={}):
     return element('table', attributes)
@@ -33,22 +33,22 @@ def td(attributes={}):
 
 
 def build_table(fields):
-    table = table({'class': 'performance'})
+    table_elm = table({'class': 'performance'})
     first_row = True
     for row in fields:
         if first_row:
-            tr = table.appendChild(tr({'class': 'first-row'}))
+            tr_elm = table_elm.appendChild(tr({'class': 'first-row'}))
             first_row = False
         else:
-            tr = table.appendChild(tr())
+            tr_elm = table_elm.appendChild(tr())
                 
         first_cell = True
         for cell in row:
             if first_cell:
-                td = tr.appendChild(td({'class': 'first-cell'}))
+                td_elm = tr_elm.appendChild(td({'class': 'first-cell'}))
                 first_cell = False
             else:
-                td = tr.appendChild(td())
-            td.appendChild(text(cell))
+                td_elm = tr_elm.appendChild(td())
+            td_elm.appendChild(text(cell))
 
-    return table
+    return table_elm
