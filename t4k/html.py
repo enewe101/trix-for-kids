@@ -33,22 +33,22 @@ def td(attributes={}):
 
 
 def build_table(fields):
-    table = t4k.html.table({'class': 'performance'})
+    table = table({'class': 'performance'})
     first_row = True
     for row in fields:
         if first_row:
-            tr = table.appendChild(t4k.html.tr({'class': 'first-row'}))
+            tr = table.appendChild(tr({'class': 'first-row'}))
             first_row = False
         else:
-            tr = table.appendChild(t4k.html.tr())
+            tr = table.appendChild(tr())
                 
         first_cell = True
         for cell in row:
             if first_cell:
-                td = tr.appendChild(t4k.html.td({'class': 'first-cell'}))
+                td = tr.appendChild(td({'class': 'first-cell'}))
                 first_cell = False
             else:
-                td = tr.appendChild(t4k.html.td())
+                td = tr.appendChild(td())
             td.appendChild(text(cell))
 
     return table
