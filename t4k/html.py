@@ -52,3 +52,27 @@ def build_table(fields):
             td_elm.appendChild(text(cell))
 
     return table_elm
+
+
+class Styler(dict):
+
+    def as_element(self):
+        style_element = DOM.createElement('style')
+        style_element.appendChild(text('\n' + self.serialize()))
+        return style_element
+
+    def serialize(self):
+        string = ''
+        for rule in self:
+
+            # Open the style rule
+            string += '%s {\n' % rule
+
+            # Write each directive
+            for directive in self[rule]:
+                string += '\t%s: %s;\n' % (directive, self[rule][directive])
+
+            # Close the style rule
+            string += '}\n'
+
+        return string
