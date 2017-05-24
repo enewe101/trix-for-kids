@@ -104,8 +104,6 @@ class PathLister(object):
         self.natural_sort = natural_sort
         self.iteritems=iteritems
 
-        print basename
-
         # Validation -- make sure self.path exists
         if not os.path.exists(self.path):
             raise OSError('no such file or directory: %s' % self.path)
@@ -250,7 +248,6 @@ class PathLister(object):
                 false if self.exclude is None
                 else self.exclude.search(item)
             )
-            print blacklist_match
             if not whitelist_match or blacklist_match:
                 continue
 
