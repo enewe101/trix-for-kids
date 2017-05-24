@@ -19,6 +19,7 @@ setup(
 		'Topic :: Utilities',
 	],
 	keywords='trix are for kids',
-	install_requires=['psutil', 'natsort']
+	install_requires=['psutil', 'natsort', 'Pyro4', 'setproctitle'],
+    scripts=['bin/mem-server']
 )
 

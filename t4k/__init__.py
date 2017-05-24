@@ -35,3 +35,4 @@ from token_map import TokenMap, SILENT, WARN, ERROR, UNK
 from counter_sampler import CounterSampler
 from crowdflower_results import CrowdflowerResults
 import html
+from mem_server import MemoryServer, mem_get, remember
