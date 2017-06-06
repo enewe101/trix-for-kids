@@ -83,3 +83,23 @@ def dzip(*dictionaries):
 		key : tuple([d.get(key, None) for d in dictionaries])
 		for key in keys
 	}
+
+
+def select(dictionary, fields, require=True):
+    """
+    Create a new dict by copying selected `fields` from the original
+    dict `dictionary`.  If `require` is True, then a field that doesn't exist
+    in the original dict will cause a KeyError; otherwise it passes over
+    missing keys
+    silently.
+    """
+    new_dict = {}
+    for field in fields:
+        try:
+            new_dict[field] = dictionary[field]
+        except KeyError:
+            if require:
+                raise
+
+    return new_dict
+
