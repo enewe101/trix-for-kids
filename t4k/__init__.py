@@ -36,3 +36,4 @@ from counter_sampler import CounterSampler
 from crowdflower_results import CrowdflowerResults
 import html
 from mem_server import MemoryServer, mem_get, remember
+from ensure_unicode import ensure_unicode
