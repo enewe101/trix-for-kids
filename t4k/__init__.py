@@ -27,7 +27,7 @@ from io_util import out
 from js import json_get_fast
 from dictionary import invert_dict, dzip, merge_dicts, select
 from id_generator import UniqueIdGenerator, get_id
-from progress import progress
+from track_progress import progress, pc
 from extrema import Max, Min
 from sample import reservoir_sample, ReservoirSampler
 from unigram_dictionary import UnigramDictionary

@@ -1,3 +1,7 @@
+def pc(fraction, decimals=2):
+    formatter = '%%.%df %%%%' % decimals
+    return formatter % (fraction*100)
+
 def progress(i, total, period=1000, prefix=''):
 	'''
 	Prints a string representing the % completion when starting the
