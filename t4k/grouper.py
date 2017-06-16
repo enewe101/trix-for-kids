@@ -4,6 +4,10 @@ import math
 import hashlib
 
 
+def skipfirst(iterable):
+    iterator = iter(iterable)
+    iterator.next()
+    return iterator
 
 
 def get_fold(data, num_folds, this_fold):
