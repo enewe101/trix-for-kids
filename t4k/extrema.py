@@ -51,6 +51,6 @@ class Max(object):
 		return key1 > key2
 
 
-class Min(object):
+class Min(Max):
 	def comp(self, key1, key2):
 		return key1 < key2
