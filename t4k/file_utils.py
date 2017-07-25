@@ -98,8 +98,8 @@ class PathLister(object):
         self.path = path
         self.files = files
         self.dirs = dirs
-        self.match = None if match is None else re.compile(match)
-        self.exclude = None if exclude is None else re.compile(exclude)
+        self.match =  match and re.compile(match)
+        self.exclude = exclude and re.compile(exclude)
         self.absolute = absolute
         self.relative = relative
         self.basename = basename
