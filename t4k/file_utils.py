@@ -31,6 +31,7 @@ def ls(
     match=None,
     exclude=None,
     absolute=False,
+    relative='.',
     basename=False,
     recurse=False,
     list_all=False,
@@ -45,6 +46,7 @@ def ls(
         match=match,
         exclude=exclude,
         absolute=absolute,
+        relative=relative,
         basename=basename,
         recurse=recurse,
         list_all=list_all,
@@ -54,8 +56,10 @@ def ls(
     return lister.generate()
 
 
+ABSOLUTE = 0
+RELATIVE = 1
+BASENAME = 2
 class PathLister(object):
-
     '''
         Iterator for listing all files in a directory.
         - Lists files found under path, unless <files> is False
@@ -86,6 +90,7 @@ class PathLister(object):
         match=None,
         exclude=None,
         absolute=False,
+        relative='.',
         basename=False,
         recurse=False,
         list_all=True,
@@ -98,6 +103,7 @@ class PathLister(object):
         self.match =  match and re.compile(match)
         self.exclude = exclude and re.compile(exclude)
         self.absolute = absolute
+        self.relative = relative
         self.basename = basename
         self.recurse = recurse
         self.list_all = list_all
@@ -160,9 +166,13 @@ class PathLister(object):
                 for d in self.items
             ]
 
-        # Otherwise reletavize to the current working directory.
+        # Otherwise reletavize to the locatin of self.relative, which is by 
+        # default the current working directory.
         elif cur_path != '.':
-            self.items = [os.path.join(cur_path, f) for f in self.items]
+            self.items = [
+                os.path.relpath(os.path.join(cur_path, f), self.relative)
+                for f in self.items
+            ]
 
         # Sort the items either "naturally" or alphabetically
         if self.natural_sort:
