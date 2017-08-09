@@ -25,7 +25,10 @@ from trace import trace, get_trace
 from io_util import out
 #from vectorize import Vectorizer
 from js import json_get_fast
-from dictionary import invert_dict, dzip, merge_dicts, select
+from dictionary import (
+    invert_dict, dzip, merge_dicts, select, min_item,
+    max_item, max_key, min_key, max_value, min_value
+)
 from id_generator import UniqueIdGenerator, get_id
 from track_progress import progress, pc
 from extrema import Max, Min

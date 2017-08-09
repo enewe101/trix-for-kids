@@ -56,8 +56,10 @@ def ls(
     return lister.generate()
 
 
+ABSOLUTE = 0
+RELATIVE = 1
+BASENAME = 2
 class PathLister(object):
-
     '''
         Iterator for listing all files in a directory.
         - Lists files found under path, unless <files> is False
