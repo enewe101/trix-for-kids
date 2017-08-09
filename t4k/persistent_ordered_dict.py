@@ -19,7 +19,7 @@ import re
 import copy
 from file_utils import ls
 import gzip
-
+import tastypy
 
 LINES_PER_FILE = 1000
 
@@ -31,6 +31,17 @@ class DuplicateKeyException(PersistentOrderedDictException):
     pass
 class PersistentOrderedDictIntegrityException(PersistentOrderedDictException):
     pass
+
+
+def convert_to_tastypod(inpath, outpath):
+    """
+    Reads a t4k.PersistentOrderedDict from inpath and converts it to 
+    tastypy.PersistentOrderedDict, stored at outpath.
+    """
+    t4k_pod = PersistentOrderedDict(inpath)
+    tasty_pod = tastypy.POD(outpath)
+    for key, val in t4k_pod:
+        tasty_pod[key] = val
 
 
 class PersistentOrderedDict(object):
