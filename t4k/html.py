@@ -3,34 +3,55 @@ from xml.dom import minidom
 # This provisional dom is used as an element factory
 DOM = minidom.Document()
 
-def element(tag_name, attributes={}):
+def new_document():
+    new_dom = minidom.Document()
+    html = dom.appendChild(element('html'))
+    head = html.appendChild(element('head'))
+    body = html.appendChild(element('body'))
+
+    return new_dom, html, head, body
+
+
+
+def element(tag_name, text_content=None, attributes={}):
     elm = DOM.createElement(tag_name)
     bind_attributes(elm, attributes)
+    if text_content is not None:
+        elm.appendChild(text(text_content))
     return elm 
+
 
 def bind_attributes(element, attributes):
     for attribute in attributes:
         element.setAttribute(attribute, attributes[attribute])
     return element
 
-def div(attributes={}):
-    return element('div', attributes)
 
-def span(attributes={}):
-    return element('span', attributes)
+def a(text_content=None, href=None, attributes={}):
+    if href is not None:
+        attributes['href'] = href
+    return element('a', text_content, attributes)
+
+def div(text_content=None, attributes={}):
+    return element('div', text, attributes)
+
+def span(text_content=None, attributes={}):
+    return element('span', text_content, attributes)
 
 def text(text_content):
     return DOM.createTextNode(str(text_content))
 
 def table(attributes={}):
-    return element('table', attributes)
+    return element('table', None, attributes)
 
 def tr(attributes={}):
-    return element('tr', attributes)
+    return element('tr', None, attributes)
 
-def td(attributes={}):
-    return element('td', attributes)
+def td(text_content=None, attributes={}):
+    return element('td', text_content, attributes)
 
+def h1(text_content=None, attributes={}):
+    return element('h1', text_content, attributes)
 
 def build_table(fields):
     table_elm = table({'class': 'performance'})
