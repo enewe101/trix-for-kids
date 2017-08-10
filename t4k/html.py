@@ -5,7 +5,7 @@ DOM = minidom.Document()
 
 def new_document():
     new_dom = minidom.Document()
-    html = dom.appendChild(element('html'))
+    html = new_dom.appendChild(element('html'))
     head = html.appendChild(element('head'))
     body = html.appendChild(element('body'))
 
@@ -38,6 +38,9 @@ def div(text_content=None, attributes={}):
 def span(text_content=None, attributes={}):
     return element('span', text_content, attributes)
 
+def br(attributes={}):
+    return element('br', None, attributes)
+
 def text(text_content):
     return DOM.createTextNode(str(text_content))
 
@@ -49,6 +52,9 @@ def tr(attributes={}):
 
 def td(text_content=None, attributes={}):
     return element('td', text_content, attributes)
+
+def th(text_content=None, attributes={}):
+    return element('th', text_content, attributes)
 
 def h1(text_content=None, attributes={}):
     return element('h1', text_content, attributes)
