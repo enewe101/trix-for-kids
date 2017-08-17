@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
 	name='t4k',
 	url='http://drgitlab.cs.mcgill.ca/enewe101/trix_for_kids',
-	version='0.6.2',
+	version='0.6.3',
 	description='my personal swiss army knife',
 	author='edward newell',
 	author_email='edward.newell@gmail.com',
