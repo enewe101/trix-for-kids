@@ -12,7 +12,6 @@ def new_document():
     return new_dom, html, head, body
 
 
-
 def element(tag_name, text_content=None, attributes={}):
     elm = DOM.createElement(tag_name)
     bind_attributes(elm, attributes)
@@ -20,12 +19,16 @@ def element(tag_name, text_content=None, attributes={}):
         elm.appendChild(text(text_content))
     return elm 
 
-
 def bind_attributes(element, attributes):
     for attribute in attributes:
         element.setAttribute(attribute, attributes[attribute])
     return element
 
+def script(src=None):
+    attributes = {}
+    if src is not None:
+        attributes['src'] = src
+    return element('script', '', attributes)
 
 def a(text_content=None, href=None, attributes={}):
     if href is not None:
@@ -33,7 +36,7 @@ def a(text_content=None, href=None, attributes={}):
     return element('a', text_content, attributes)
 
 def div(text_content=None, attributes={}):
-    return element('div', text, attributes)
+    return element('div', text_content, attributes)
 
 def span(text_content=None, attributes={}):
     return element('span', text_content, attributes)
