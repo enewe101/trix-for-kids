@@ -1,8 +1,12 @@
+import itertools
 import numpy as np
 import random
 import math
 import hashlib
 
+
+def skip_blank(iterable):
+    return itertools.ifilter(lambda x: x.strip()!='', iterable)
 
 def skipfirst(iterable):
     iterator = iter(iterable)
