@@ -62,6 +62,15 @@ def th(text_content=None, attributes={}):
 def h1(text_content=None, attributes={}):
     return element('h1', text_content, attributes)
 
+def h2(text_content=None, attributes={}):
+    return element('h2', text_content, attributes)
+
+def h3(text_content=None, attributes={}):
+    return element('h3', text_content, attributes)
+
+def h4(text_content=None, attributes={}):
+    return element('h4', text_content, attributes)
+
 def build_table(fields):
     table_elm = table({'class': 'performance'})
     first_row = True
