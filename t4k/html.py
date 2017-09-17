@@ -1,12 +1,28 @@
+import types
+import re
 from xml.dom import minidom
 
+xml_declaration = re.compile(r'<\?xml[^>]*?>')
+html_declaration = '<!DOCTYPE html>'
+def HtmlDocument():
+    dom = minidom.Document()
+    def toprettyhtml(self, *args):
+        html = self.toprettyxml(*args)
+        return html_declaration + xml_declaration.split(html, 1)[1]
+    dom.toprettyhtml = types.MethodType(toprettyhtml, dom, minidom.Document)
+    return dom
+
+
 # This provisional dom is used as an element factory
-DOM = minidom.Document()
+DOM = HtmlDocument()
 
 def new_document():
-    new_dom = minidom.Document()
-    html = new_dom.appendChild(element('html'))
+    new_dom = HtmlDocument()
+    html = new_dom.appendChild(element('html', attributes={'lang':'en'}))
     head = html.appendChild(element('head'))
+    head.appendChild(meta(attributes={
+        'http-equiv':'Content-Type', 'content':'text/html', 'charset':'utf-8'
+    }))
     body = html.appendChild(element('body'))
 
     return new_dom, html, head, body
@@ -24,8 +40,10 @@ def bind_attributes(element, attributes):
         element.setAttribute(attribute, attributes[attribute])
     return element
 
-def script(src=None):
-    attributes = {}
+def meta(attributes={}):
+    return element('meta', '', attributes)
+
+def script(src=None, attributes={}):
     if src is not None:
         attributes['src'] = src
     return element('script', '', attributes)
