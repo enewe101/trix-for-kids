@@ -35,13 +35,13 @@ def a(text_content=None, href=None, attributes={}):
         attributes['href'] = href
     return element('a', text_content, attributes)
 
-def ol(text_content, attributes={}):
+def ol(text_content=None, attributes={}):
     return element('ol', text_content, attributes)
 
-def ul(text_content, attributes={}):
+def ul(text_content=None, attributes={}):
     return element('ul', text_content, attributes)
 
-def li(text_content, attributes={}):
+def li(text_content=None, attributes={}):
     return element('li', text_content, attributes)
 
 def div(text_content=None, attributes={}):
