@@ -8,6 +8,12 @@ import hashlib
 def skip_blank(iterable):
     return itertools.ifilter(lambda x: x.strip()!='', iterable)
 
+
+def trimmed_nonblank(iterable):
+    for line in skip_blank(iterable):
+        yield line.strip()
+
+
 def skipfirst(iterable):
     iterator = iter(iterable)
     iterator.next()

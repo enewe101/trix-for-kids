@@ -1,9 +1,9 @@
 import t4k
 
-def invert_dict(dictionary):
+def invert_dict(d):
     new_dict = {}
-    for key in dictionary:
-        new_dict[dictionary[key]] = key
+    for key in d:
+        new_dict[d[key]] = key
 
     return new_dict
 
