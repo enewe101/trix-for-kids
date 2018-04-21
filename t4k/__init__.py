@@ -19,7 +19,7 @@ from string_alignment import (
 from grouper import (
 	chunk, group, flatten, lindex, rindex, indices, skip, IncrementingMap,
 	rangify, ltrim, rtrim, trim, binify, inbin, get_fold, skipfirst, 
-        skip_blank, trimmed_nonblank
+        skip_blank, trimmed_nonblank, stripped
 )
 import patterns
 from trace import trace, get_trace

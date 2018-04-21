@@ -7,7 +7,7 @@ class Max(object):
             self.keep_last = keep_last
             self._is_draw = False
 
-	def add(self, key, item):
+	def add(self, key, item=None):
 
             # The first item to ever be checked always wins
             if self.extreme_key is None:

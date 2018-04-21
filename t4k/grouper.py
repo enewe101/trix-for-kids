@@ -14,6 +14,11 @@ def trimmed_nonblank(iterable):
         yield line.strip()
 
 
+def stripped(iterable):
+    for string in iterable:
+        yield string.strip()
+
+
 def skipfirst(iterable):
     iterator = iter(iterable)
     iterator.next()
