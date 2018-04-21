@@ -6,8 +6,8 @@ xml_declaration = re.compile(r'<\?xml[^>]*?>')
 html_declaration = '<!DOCTYPE html>'
 def HtmlDocument():
     dom = minidom.Document()
-    def toprettyhtml(self, *args):
-        html = self.toprettyxml(*args)
+    def toprettyhtml(self, *args, **kwargs):
+        html = self.toprettyxml(*args, **kwargs)
         return html_declaration + xml_declaration.split(html, 1)[1]
     dom.toprettyhtml = types.MethodType(toprettyhtml, dom, minidom.Document)
     return dom
