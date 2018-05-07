@@ -5,6 +5,11 @@ import math
 import hashlib
 
 
+def strings(iterable):
+    for item in iterable:
+        yield str(item)
+
+
 def skip_blank(iterable):
     return itertools.ifilter(lambda x: x.strip()!='', iterable)
 
