@@ -5,8 +5,10 @@ import math
 import hashlib
 
 
-def strings(iterable):
+def strings(iterable, *args):
     for item in iterable:
+        yield str(item)
+    for item in args:
         yield str(item)
 
 

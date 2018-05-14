@@ -44,6 +44,15 @@ class Max(object):
 		for key, item in key_item_pairs:
 			self.add(key, item)
 
+        def min_key(self):
+            raise NotImplementedError
+        def min_item(self):
+            raise NotImplementedError
+        def max_key(self):
+            return self.extreme_key
+        def max_item(self):
+            return self.extreme_item
+
 	def get(self):
 		return self.extreme_key, self.extreme_item
 
@@ -54,3 +63,11 @@ class Max(object):
 class Min(Max):
 	def comp(self, key1, key2):
 		return key1 < key2
+        def min_key(self):
+            return self.extreme_key
+        def min_item(self):
+            return self.extreme_item
+        def max_key(self):
+            raise NotImplementedError
+        def max_item(self):
+            raise NotImplementedError
